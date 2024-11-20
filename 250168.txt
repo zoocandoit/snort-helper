@@ -1,0 +1,1 @@
+alert tcp any any -> any any (msg:"CVE-2024-8504 VICIdial 2.14-917a Remote Code Execution"; flow:to_server,established; content:"SELECT"; http_method; content:"(sleep("; http_uri; classtype:web-application-attack; reference:cve,CVE-2024-8504; sid:250168; rev:1;)
