@@ -4,14 +4,6 @@ A Python utility powered by OpenAI GPT API for generating and managing Snort int
 
 ---
 
-## **Features**
-- **GPT-Powered**: Automatically generate Snort rules based on user-provided descriptions or data.
-- **Interactive Prompts**: Provide CVE information, patterns, protocols, and other details to dynamically generate rules.
-- **Flexible Output**: Save generated rules to customizable `.rules` files.
-- **Rule Validation**: Ensures rules are syntactically correct before saving.
-
----
-
 ## **Installation**
 
 1. Clone the repository:
