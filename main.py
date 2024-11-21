@@ -1,19 +1,12 @@
-class SnortHelper:
-    def __init__(self):
-        pass
+from gpt_helper import GptHelper
+from dotenv import load_dotenv
+import os
 
-    def generate_rule(self, cve_id, title, date, pattern, sid):
-        rule_template = (
-            f'alert tcp any any -> any any '
-            f'(msg:"{cve_id} {title}"; '
-            f'flow:to_server,established; '
-            f'content:"{pattern.split()[0]}"; http_method; '
-            f'content:"{pattern.split()[1]}"; http_uri; '
-            f'classtype:web-application-attack; '
-            f'reference:cve,{cve_id}; '
-            f'sid:{sid}; rev:1;)'
-        )
-        return rule_template
+load_dotenv()
+
+class SnortHelper:
+    def __init__(self, gpt_helper):
+        self.gpt_helper = gpt_helper
 
     def save_rule(self, rule, sid):
         filename = f"{sid}.txt"
@@ -26,33 +19,35 @@ class SnortHelper:
 
     def run(self):
         print("=" * 50)
-        print("Welcome to Snort Helper!".center(50))
+        print("Welcome to Snort Helper with GPT!".center(50))
         print("=" * 50)
 
         while True:
-            print("\n🔹 Enter CVE information to generate a Snort Rule:")
+            print("\n🔹 Enter Snort Rule Information:")
             try:
-                cve_id = input("  ➤ CVE ID: ").strip()
-                title = input("  ➤ TITLE: ").strip()
-                date = input("  ➤ DATE: ").strip()
-                pattern = input("  ➤ PATTERN: ").strip()
+                data = input("Paste the data for rule generation:\n").strip()
                 sid = input("  ➤ SID: ").strip()
 
-                if not (cve_id and title and date and pattern and sid.isdigit()):
+                if not (data and sid.isdigit()):
                     print("\n❌ Invalid input. Please provide all required fields correctly.")
                     continue
 
-                rule = self.generate_rule(cve_id, title, date, pattern, sid)
-                print("\n✨ Generated Snort Rule:")
-                print("=" * 50)
-                print(rule)
-                print("=" * 50)
+                print("\n🔄 Generating Snort Rule with GPT...")
+                rule = self.gpt_helper.generate_rule(data)
 
-                save_option = input("\n💾 Do you want to save this rule? (y/n): ").strip().lower()
-                if save_option == 'y':
-                    self.save_rule(rule, sid)
+                if rule:
+                    print("\n✨ Generated Snort Rule:")
+                    print("=" * 50)
+                    print(rule)
+                    print("=" * 50)
+
+                    save_option = input("\n💾 Do you want to save this rule? (y/n): ").strip().lower()
+                    if save_option == 'y':
+                        self.save_rule(rule, sid)
+                    else:
+                        print("\n🚫 Rule not saved.")
                 else:
-                    print("\n🚫 Rule not saved.")
+                    print("\n❌ Failed to generate rule.")
 
                 continue_option = input("\n➤ Do you want to create another rule? (y/n): ").strip().lower()
                 if continue_option != 'y':
@@ -65,5 +60,11 @@ class SnortHelper:
 
 
 if __name__ == "__main__":
-    helper = SnortHelper()
-    helper.run()
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        print("❌ Error: OPENAI_API_KEY is not set in the .env file.")
+        exit(1)
+
+    gpt_helper = GptHelper(api_key)
+    snort_helper = SnortHelper(gpt_helper)
+    snort_helper.run()
